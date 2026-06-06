@@ -1,5 +1,5 @@
 # Builds a dev-only layer on top of the production image
-FROM php:8.2-fpm AS development
+FROM php:8.4-fpm AS development
 
 # Use ARGs to define environment variables passed from the Docker build command or Docker Compose.
 ARG XDEBUG_ENABLED=true
@@ -10,6 +10,11 @@ ARG XDEBUG_LOG=/dev/stdout
 ARG XDEBUG_LOG_LEVEL=0
 
 USER root
+
+# Install PostgreSQL extensions required by Laravel's pgsql connection
+RUN apt-get update && apt-get install -y --no-install-recommends libpq-dev && \
+  docker-php-ext-install pdo_pgsql pgsql && \
+  rm -rf /var/lib/apt/lists/*
 
 # Configure Xdebug if enabled
 RUN if [ "${XDEBUG_ENABLED}" = "true" ]; then \
