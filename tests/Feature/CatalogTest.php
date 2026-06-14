@@ -16,7 +16,7 @@ class CatalogTest extends TestCase
     {
         $author = Author::create(['first_name' => 'Leo', 'last_name' => 'Tolstoy']);
         $genre = Genre::create(['name' => 'Classic']);
-        
+
         Book::create([
             'author_id' => $author->id,
             'genre_id' => $genre->id,
@@ -50,7 +50,7 @@ class CatalogTest extends TestCase
     {
         $author = Author::create(['first_name' => 'Leo', 'last_name' => 'Tolstoy']);
         $genre = Genre::create(['name' => 'Classic']);
-        
+
         Book::create([
             'author_id' => $author->id,
             'genre_id' => $genre->id,
@@ -91,7 +91,7 @@ class CatalogTest extends TestCase
     {
         $author = Author::create(['first_name' => 'Leo', 'last_name' => 'Tolstoy']);
         $genre = Genre::create(['name' => 'Classic']);
-        
+
         $book1 = Book::create([
             'author_id' => $author->id,
             'genre_id' => $genre->id,
@@ -142,7 +142,124 @@ class CatalogTest extends TestCase
             ]);
 
         $this->assertEquals(2, $response->json('data.0.books_count'));
-        // The last book should be Anna Karenina (id of book2)
         $this->assertEquals($book2->id, $response->json('data.0.last_book.id'));
+    }
+
+    public function test_books_can_be_filtered_by_author()
+    {
+        $author1 = Author::create(['first_name' => 'Leo', 'last_name' => 'Tolstoy']);
+        $author2 = Author::create(['first_name' => 'Fyodor', 'last_name' => 'Dostoevsky']);
+        $genre = Genre::create(['name' => 'Classic']);
+
+        $book1 = Book::create([
+            'author_id' => $author1->id,
+            'genre_id' => $genre->id,
+            'title' => 'War and Peace',
+            'price' => 999.00,
+            'year' => 1869
+        ]);
+
+        $book2 = Book::create([
+            'author_id' => $author2->id,
+            'genre_id' => $genre->id,
+            'title' => 'Crime and Punishment',
+            'price' => 799.00,
+            'year' => 1866
+        ]);
+
+        $response = $this->getJson("/api/books?author_id={$author1->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $book1->id);
+    }
+
+    public function test_books_can_be_filtered_by_genre()
+    {
+        $author = Author::create(['first_name' => 'Leo', 'last_name' => 'Tolstoy']);
+        $genre1 = Genre::create(['name' => 'Classic']);
+        $genre2 = Genre::create(['name' => 'Drama']);
+
+        $book1 = Book::create([
+            'author_id' => $author->id,
+            'genre_id' => $genre1->id,
+            'title' => 'War and Peace',
+            'price' => 999.00,
+            'year' => 1869
+        ]);
+
+        $book2 = Book::create([
+            'author_id' => $author->id,
+            'genre_id' => $genre2->id,
+            'title' => 'Anna Karenina',
+            'price' => 500.00,
+            'year' => 1877
+        ]);
+
+        $response = $this->getJson("/api/books?genre_id={$genre2->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $book2->id);
+    }
+
+    public function test_books_can_be_filtered_by_year_range()
+    {
+        $author = Author::create(['first_name' => 'Leo', 'last_name' => 'Tolstoy']);
+        $genre = Genre::create(['name' => 'Classic']);
+
+        $book1 = Book::create([
+            'author_id' => $author->id,
+            'genre_id' => $genre->id,
+            'title' => 'War and Peace',
+            'price' => 999.00,
+            'year' => 1869
+        ]);
+
+        $book2 = Book::create([
+            'author_id' => $author->id,
+            'genre_id' => $genre->id,
+            'title' => 'Anna Karenina',
+            'price' => 500.00,
+            'year' => 1877
+        ]);
+
+        $response = $this->getJson('/api/books?year_from=1870&year_to=1880');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $book2->id);
+    }
+
+    public function test_books_can_be_sorted_by_price()
+    {
+        $author = Author::create(['first_name' => 'Leo', 'last_name' => 'Tolstoy']);
+        $genre = Genre::create(['name' => 'Classic']);
+
+        $book1 = Book::create([
+            'author_id' => $author->id,
+            'genre_id' => $genre->id,
+            'title' => 'Cheap Book',
+            'price' => 100.00,
+            'year' => 1900
+        ]);
+
+        $book2 = Book::create([
+            'author_id' => $author->id,
+            'genre_id' => $genre->id,
+            'title' => 'Expensive Book',
+            'price' => 2000.00,
+            'year' => 1905
+        ]);
+
+        $response = $this->getJson('/api/books?sort=price_asc');
+        $response->assertStatus(200);
+        $this->assertEquals($book1->id, $response->json('data.0.id'));
+        $this->assertEquals($book2->id, $response->json('data.1.id'));
+
+        $response = $this->getJson('/api/books?sort=price_desc');
+        $response->assertStatus(200);
+        $this->assertEquals($book2->id, $response->json('data.0.id'));
+        $this->assertEquals($book1->id, $response->json('data.1.id'));
     }
 }

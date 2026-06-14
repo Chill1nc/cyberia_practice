@@ -12,7 +12,11 @@ class CatalogController extends Controller
 {
     public function books(Request $request)
     {
+        $filter = new BookFilter($request->only(['author_id', 'genre_id', 'year_from', 'year_to']));
+        $sorter = new BookSorter($request->input('sort'));
         $books = Book::with(['author', 'genre'])
+            ->filter($filter)
+            ->sort($sorter)
             ->paginate($request->input('per_page', 10));
         return response()->json($books);
     }
