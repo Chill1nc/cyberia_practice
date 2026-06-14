@@ -1,31 +1,32 @@
 <?php
-
 namespace App\Http\Controllers;
-
+use App\Filters\BookFilter;
+use App\Filters\BookSorter;
+use App\Http\Resources\AuthorResource;
+use App\Http\Resources\GenreResource;
 use App\Models\Author;
 use App\Models\Book;
 use App\Models\Genre;
-
+use Illuminate\Http\Request;
 class CatalogController extends Controller
 {
-    public function books()
+    public function books(Request $request)
     {
-        return response()->json(
-            Book::with(['author', 'genre'])->get()
-        );
+        $books = Book::with(['author', 'genre'])
+            ->paginate($request->input('per_page', 10));
+        return response()->json($books);
     }
-
-    public function genres()
+    public function genres(Request $request)
     {
-        return response()->json(
-            Genre::all()
-        );
+        $genres = Genre::withCount('books')
+            ->simplePaginate($request->input('per_page', 10));
+        return GenreResource::collection($genres)->response()->getData(true);
     }
-
-    public function authors()
+    public function authors(Request $request)
     {
-        return response()->json(
-            Author::all()
-        );
+        $authors = Author::withCount('books')
+            ->with('lastBook')
+            ->paginate($request->input('per_page', 10));
+        return AuthorResource::collection($authors)->response()->getData(true);
     }
 }

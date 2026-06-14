@@ -15,4 +15,8 @@ class Author extends Model
     {
         return $this->hasMany(Book::class);
     }
+    public function lastBook()
+    {
+        return $this->hasOne(Book::class)->latestOfMany();
+    }
 }
