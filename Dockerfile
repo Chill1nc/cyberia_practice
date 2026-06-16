@@ -1,5 +1,7 @@
 FROM php:8.4-fpm AS development
 
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+
 ARG XDEBUG_ENABLED=true
 ARG XDEBUG_MODE=develop,coverage,debug,profile
 ARG XDEBUG_HOST=host.docker.internal
@@ -12,9 +14,18 @@ ARG GID=1000
 
 USER root
 
-RUN apt-get update && apt-get install -y --no-install-recommends libpq-dev && \
-  docker-php-ext-install pdo_pgsql pgsql && \
-  rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev \
+    libzip-dev \
+    unzip \
+    zip \
+    git && \
+    docker-php-ext-install \
+    pdo_pgsql \
+    pgsql \
+    exif \
+    zip && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN if [ "${XDEBUG_ENABLED}" = "true" ]; then \
     pecl install xdebug && \

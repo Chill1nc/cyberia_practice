@@ -29,4 +29,18 @@ class BookFactory extends Factory
         ];
     }
 
+    public function configure()
+    {
+        return $this->afterCreating(function (Book $book) {
+            $placeholder = database_path('seeders/media/placeholder.png');
+            if (file_exists($placeholder)) {
+                for ($i = 0; $i < 3; $i++) {
+                    $book->addMedia($placeholder)
+                        ->preservingOriginal()
+                        ->toMediaCollection('images');
+                }
+            }
+        });
+    }
+
 }

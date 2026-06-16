@@ -12,6 +12,20 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        $mediaPath = database_path('seeders/media');
+        if (!file_exists($mediaPath)) {
+            mkdir($mediaPath, 0755, true);
+        }
+
+        $placeholder = $mediaPath . '/placeholder.png';
+        if (!file_exists($placeholder)) {
+            $img = imagecreatetruecolor(200, 200);
+            $bg = imagecolorallocate($img, 150, 150, 150);
+            imagefill($img, 0, 0, $bg);
+            imagejpeg($img, $placeholder);
+            imagedestroy($img);
+        }
+
         $this->call([
             GenreSeeder::class,
             AuthorSeeder::class,

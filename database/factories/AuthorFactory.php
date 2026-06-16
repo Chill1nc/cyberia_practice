@@ -25,4 +25,16 @@ class AuthorFactory extends Factory
         ];
     }
 
+    public function configure()
+    {
+        return $this->afterCreating(function (Author $author) {
+            $placeholder = database_path('seeders/media/placeholder.png');
+            if (file_exists($placeholder)) {
+                $author->addMedia($placeholder)
+                    ->preservingOriginal()
+                    ->toMediaCollection('avatar');
+            }
+        });
+    }
+
 }

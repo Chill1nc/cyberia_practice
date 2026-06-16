@@ -14,10 +14,16 @@ class CatalogController extends Controller
     {
         $filter = new BookFilter($request->only(['author_id', 'genre_id', 'year_from', 'year_to']));
         $sorter = new BookSorter($request->input('sort'));
-        $books = Book::with(['author', 'genre'])
+        $books = Book::with(['author', 'genre', 'media'])
             ->filter($filter)
             ->sort($sorter)
             ->paginate($request->input('per_page', 10));
+
+        $books->through(function ($book) {
+            $book->images = $book->getMedia('images')->map->getUrl();
+            return $book;
+        });
+
         return response()->json($books);
     }
     public function genres(Request $request)
@@ -29,7 +35,7 @@ class CatalogController extends Controller
     public function authors(Request $request)
     {
         $authors = Author::withCount('books')
-            ->with('lastBook')
+            ->with(['lastBook', 'media'])
             ->paginate($request->input('per_page', 10));
         return AuthorResource::collection($authors)->response()->getData(true);
     }

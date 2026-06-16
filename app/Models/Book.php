@@ -7,10 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use App\Filters\BookFilter;
 use App\Filters\BookSorter;
 use Illuminate\Database\Eloquent\Builder;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Book extends Model
+
+class Book extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('images');
+    }
 
     protected $fillable = [
         'author_id',
@@ -41,3 +48,4 @@ class Book extends Model
         return $sorter->apply($query);
     }
 }
+

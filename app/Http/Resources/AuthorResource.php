@@ -20,6 +20,7 @@ class AuthorResource extends JsonResource
             'last_name' => $this->last_name,
             'middle_name' => $this->middle_name,
             'nickname' => $this->nickname,
+            'avatar' => $this->getFirstMediaUrl('avatar'),
             'books_count' => $this->books_count,
             'last_book' => $this->relationLoaded('lastBook') ? $this->lastBook : null,
             'created_at' => $this->created_at,
