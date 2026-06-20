@@ -17,6 +17,7 @@ class CatalogController extends Controller
         'author_id', 'genre_id', 'year_from', 'year_to',
         'publisher', 'cover_type', 'age_limit',
         'pages_from', 'pages_to', 'price_from', 'price_to',
+        'search',
     ];
 
     public function books(Request $request)
@@ -24,7 +25,9 @@ class CatalogController extends Controller
         $filter = new BookFilter($request->only(self::FILTER_KEYS));
         $sorter = new BookSorter($request->input('sort'));
 
-        $books = Book::with(['author', 'genre', 'media'])
+        $books = Book::with(['author', 'genre', 'media', 'reviews', 'reviews.currentUserRate'])
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
             ->filter($filter)
             ->sort($sorter)
             ->paginate($request->input('per_page', 10));
@@ -35,6 +38,16 @@ class CatalogController extends Controller
         });
 
         return response()->json($books);
+    }
+
+    public function show(Book $book)
+    {
+        $book->load(['author', 'genre', 'media', 'reviews', 'reviews.currentUserRate']);
+        $book->loadCount('reviews');
+        $book->loadAvg('reviews', 'rating');
+        $book->images = $book->getMedia('images')->map->getUrl();
+
+        return response()->json($book);
     }
 
     public function genres(Request $request)
@@ -58,7 +71,6 @@ class CatalogController extends Controller
     {
         $activeFilters = $request->only(self::FILTER_KEYS);
 
-        // Возвращает query с применением всех фильтров, кроме тех что в $excludeKeys
         $query = function (array $excludeKeys) use ($activeFilters) {
             $filtered = array_diff_key($activeFilters, array_flip($excludeKeys));
             return Book::query()->filter(new BookFilter($filtered));

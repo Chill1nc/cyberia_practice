@@ -6,9 +6,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class BookFilter
 {
-    /**
-     * Create a new class instance.
-     */
     protected array $filters;
 
     public function __construct(array $filters)
@@ -81,5 +78,10 @@ class BookFilter
     public function price_to(Builder $builder, $value): void
     {
         $builder->where('price', '<=', $value);
+    }
+
+    public function search(Builder $builder, $value): void
+    {
+        $builder->where('title', 'ilike', '%' . $value . '%');
     }
 }

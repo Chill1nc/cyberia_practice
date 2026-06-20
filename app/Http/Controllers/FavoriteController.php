@@ -9,10 +9,27 @@ class FavoriteController extends Controller
 {
     public function index(Request $request)
     {
+        $filter = new \App\Filters\BookFilter($request->only([
+            'author_id', 'genre_id', 'year_from', 'year_to',
+            'publisher', 'cover_type', 'age_limit',
+            'pages_from', 'pages_to', 'price_from', 'price_to',
+            'search',
+        ]));
+        $sorter = new \App\Filters\BookSorter($request->input('sort'));
+
         $favorites = $request->user()
             ->favoriteBooks()
-            ->with(['author', 'genre'])
+            ->with(['author', 'genre', 'media', 'reviews', 'reviews.currentUserRate'])
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
+            ->filter($filter)
+            ->sort($sorter)
             ->paginate($request->input('per_page', 10));
+
+        $favorites->through(function ($book) {
+            $book->images = $book->getMedia('images')->map->getUrl();
+            return $book;
+        });
 
         return response()->json($favorites);
     }

@@ -6,9 +6,10 @@ use App\Http\Controllers\FavoriteController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/books', [CatalogController::class, 'books']);
+Route::get('/books/filters', [CatalogController::class, 'filters']);
+Route::get('/books/{book}', [CatalogController::class, 'show']);
 Route::get('/genres', [CatalogController::class, 'genres']);
 Route::get('/authors', [CatalogController::class, 'authors']);
-Route::get('/books/filters', [CatalogController::class, 'filters']);
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/login/verify', [AuthController::class, 'verify']);
@@ -21,4 +22,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/favorites', [FavoriteController::class, 'store']);
     Route::delete('/favorites/{book}', [FavoriteController::class, 'destroy']);
     Route::delete('/favorites', [FavoriteController::class, 'clear']);
+    Route::post('/reviews', [\App\Http\Controllers\ReviewController::class, 'store']);
+    Route::post('/reviews/{review}/rate', [\App\Http\Controllers\ReviewController::class, 'rate']);
 });

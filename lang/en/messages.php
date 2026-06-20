@@ -26,4 +26,9 @@ return [
         'created_at' => 'Created At',
         'system' => 'System',
     ],
+    'reviews' => [
+        'added'   => 'Review added successfully.',
+        'rated'   => 'Rating accepted.',
+        'unrated' => 'Rating removed.',
+    ],
 ];

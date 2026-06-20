@@ -70,9 +70,5 @@ class AppServiceProvider extends ServiceProvider
                 ];
             });
         });
-
-        \App\Models\Book::observe(\App\Observers\BookObserver::class);
-        \App\Models\Author::observe(\App\Observers\AuthorObserver::class);
-        \App\Models\Genre::observe(\App\Observers\GenreObserver::class);
     }
 }
