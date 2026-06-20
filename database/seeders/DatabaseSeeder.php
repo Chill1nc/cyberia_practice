@@ -38,6 +38,12 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
             'phone' => '+79991112233',
         ]);
-    }
 
+        \App\Models\Admin::updateOrCreate([
+            'email' => 'admin@admin.com',
+        ], [
+            'name' => 'Admin',
+            'password' => 'admin',
+        ]);
+    }
 }

@@ -13,27 +13,73 @@ class BookFilter
 
     public function __construct(array $filters)
     {
-        $this->filters = $filters;
+        $this->filters = array_filter($filters, function ($value) {
+            return $value !== null && $value !== '';
+        });
     }
 
     public function apply(Builder $builder): Builder
     {
-        if (!empty($this->filters['author_id'])) {
-            $builder->where('author_id', $this->filters['author_id']);
+        foreach ($this->filters as $name => $value) {
+            if (method_exists($this, $name)) {
+                $this->$name($builder, $value);
+            }
         }
-
-        if (!empty($this->filters['genre_id'])) {
-            $builder->where('genre_id', $this->filters['genre_id']);
-        }
-
-        if (!empty($this->filters['year_from'])) {
-            $builder->where('year', '>=', $this->filters['year_from']);
-        }
-
-        if (!empty($this->filters['year_to'])) {
-            $builder->where('year', '<=', $this->filters['year_to']);
-        }
-
         return $builder;
+    }
+
+    public function author_id(Builder $builder, $value): void
+    {
+        $builder->where('author_id', $value);
+    }
+
+    public function genre_id(Builder $builder, $value): void
+    {
+        $builder->where('genre_id', $value);
+    }
+
+    public function year_from(Builder $builder, $value): void
+    {
+        $builder->where('year', '>=', $value);
+    }
+
+    public function year_to(Builder $builder, $value): void
+    {
+        $builder->where('year', '<=', $value);
+    }
+
+    public function publisher(Builder $builder, $value): void
+    {
+        $builder->where('publisher', 'like', '%' . $value . '%');
+    }
+
+    public function cover_type(Builder $builder, $value): void
+    {
+        $builder->where('cover_type', $value);
+    }
+
+    public function age_limit(Builder $builder, $value): void
+    {
+        $builder->where('age_limit', $value);
+    }
+
+    public function pages_from(Builder $builder, $value): void
+    {
+        $builder->where('pages', '>=', $value);
+    }
+
+    public function pages_to(Builder $builder, $value): void
+    {
+        $builder->where('pages', '<=', $value);
+    }
+
+    public function price_from(Builder $builder, $value): void
+    {
+        $builder->where('price', '>=', $value);
+    }
+
+    public function price_to(Builder $builder, $value): void
+    {
+        $builder->where('price', '<=', $value);
     }
 }

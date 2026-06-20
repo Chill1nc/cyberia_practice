@@ -18,24 +18,59 @@ class BookSorter
 
     public function apply(Builder $builder): Builder
     {
-        switch ($this->sortBy) {
-            case 'created_at_asc':
-                $builder->orderBy('created_at', 'asc');
-                break;
-            case 'created_at_desc':
-                $builder->orderBy('created_at', 'desc');
-                break;
-            case 'price_asc':
-                $builder->orderBy('price', 'asc');
-                break;
-            case 'price_desc':
-                $builder->orderBy('price', 'desc');
-                break;
-            default:
-                $builder->orderBy('created_at', 'desc');
-                break;
+        $method = $this->sortBy;
+
+        if ($method && method_exists($this, $method)) {
+            $this->$method($builder);
+        } else {
+            $this->sortByDefault($builder);
         }
 
         return $builder;
+    }
+
+    public function price_asc(Builder $builder)
+    {
+        $builder->orderBy('price', 'asc');
+    }
+
+    public function price_desc(Builder $builder)
+    {
+        $builder->orderBy('price', 'desc');
+    }
+
+    public function year_asc(Builder $builder)
+    {
+        $builder->orderBy('year', 'asc');
+    }
+
+    public function year_desc(Builder $builder)
+    {
+        $builder->orderBy('year', 'desc');
+    }
+
+    public function reviews_count_asc(Builder $builder)
+    {
+        $builder->withCount('reviews')->orderBy('reviews_count', 'asc');
+    }
+
+    public function reviews_count_desc(Builder $builder)
+    {
+        $builder->withCount('reviews')->orderBy('reviews_count', 'desc');
+    }
+
+    public function created_at_asc(Builder $builder)
+    {
+        $builder->orderBy('created_at', 'asc');
+    }
+
+    public function created_at_desc(Builder $builder)
+    {
+        $builder->orderBy('created_at', 'desc');
+    }
+
+    public function sortByDefault(Builder $builder)
+    {
+        $builder->orderBy('created_at', 'desc');
     }
 }

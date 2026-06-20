@@ -26,7 +26,13 @@ class Book extends Model implements HasMedia
         'description',
         'price',
         'old_price',
-        'year'
+        'year',
+        'publisher',
+        'pages',
+        'size',
+        'cover_type',
+        'weight',
+        'age_limit',
     ];
 
     public function author()
@@ -46,6 +52,10 @@ class Book extends Model implements HasMedia
     public function scopeSort(Builder $query, BookSorter $sorter): Builder
     {
         return $sorter->apply($query);
+    }
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
     }
 }
 

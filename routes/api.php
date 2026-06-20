@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/books', [CatalogController::class, 'books']);
 Route::get('/genres', [CatalogController::class, 'genres']);
 Route::get('/authors', [CatalogController::class, 'authors']);
+Route::get('/books/filters', [CatalogController::class, 'filters']);
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/login/verify', [AuthController::class, 'verify']);

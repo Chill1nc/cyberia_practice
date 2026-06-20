@@ -27,7 +27,7 @@ class FavoriteController extends Controller
         $user->favoriteBooks()->syncWithoutDetaching([$request->book_id]);
 
         return response()->json([
-            'message' => 'Книга добавлена в избранное.'
+            'message' => __('messages.favorites.added')
         ], 201);
     }
 
@@ -37,7 +37,7 @@ class FavoriteController extends Controller
         $user->favoriteBooks()->detach($bookId);
 
         return response()->json([
-            'message' => 'Книга удалена из избранного.'
+            'message' => __('messages.favorites.removed')
         ]);
     }
 
@@ -46,7 +46,7 @@ class FavoriteController extends Controller
         $request->user()->favoriteBooks()->detach();
 
         return response()->json([
-            'message' => 'Список избранного очищен.'
+            'message' => __('messages.favorites.cleared')
         ]);
     }
 }

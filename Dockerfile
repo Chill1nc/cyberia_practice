@@ -17,14 +17,22 @@ USER root
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     libzip-dev \
+    libicu-dev \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
     unzip \
     zip \
     git && \
+    docker-php-ext-configure intl && \
+    docker-php-ext-configure gd --with-freetype --with-jpeg && \
     docker-php-ext-install \
     pdo_pgsql \
     pgsql \
     exif \
-    zip && \
+    zip \
+    intl \
+    gd && \
     rm -rf /var/lib/apt/lists/*
 
 RUN if [ "${XDEBUG_ENABLED}" = "true" ]; then \

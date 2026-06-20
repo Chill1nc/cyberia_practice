@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 class AuthController extends Controller
@@ -15,14 +16,20 @@ class AuthController extends Controller
         $searchValue = $request->input($searchField);
         $user = User::firstOrCreate([$searchField => $searchValue]);
 
+        if ($user->wasRecentlyCreated) {
+            ActivityLogger::log('registered', $user, null, [
+                $searchField => $searchValue,
+            ]);
+        }
+
         $code = str_pad((string) rand(0, 9999), 4, '0', STR_PAD_LEFT);
         $user->update([
             'login_code' => $code,
             'login_code_expires_at' => now()->addMinutes(10),
         ]);
-        Log::info("Код авторизации для {$searchValue}: {$code}");
+        Log::info("Login code for {$searchValue}: {$code}");
         return response()->json([
-            'message' => 'Код авторизации отправлен.',
+            'message' => __('messages.auth.code_sent'),
             'debug_code' => $code
         ]);
     }
@@ -37,13 +44,16 @@ class AuthController extends Controller
         $searchValue = $request->input($searchField);
         $user = User::where($searchField, $searchValue)->first();
         if (!$user || $user->login_code !== $request->code || now()->greaterThan($user->login_code_expires_at)) {
-            return response()->json(['message' => 'Неверный или просроченный код.'], 422);
+            return response()->json(['message' => __('messages.auth.invalid_code')], 422);
         }
         $user->update([
             'login_code' => null,
             'login_code_expires_at' => null,
         ]);
         $token = $user->createToken('auth_token')->plainTextToken;
+        
+        ActivityLogger::log('login', $user, $user);
+
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
@@ -64,7 +74,7 @@ class AuthController extends Controller
         ]);
         $user->update($validated);
         return response()->json([
-            'message' => 'Профиль обновлен.',
+            'message' => __('messages.auth.profile_updated'),
             'user' => $user
         ]);
     }
@@ -72,7 +82,7 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
         return response()->json([
-            'message' => 'Вы успешно вышли из системы.'
+            'message' => __('messages.auth.logout_success')
         ]);
     }
 }
